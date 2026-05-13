@@ -40,6 +40,17 @@ for _lift, _data in BIG3_TEMPLATES.items():
         TEMPLATE_LOOKUP[_v] = (_lift, False)
 
 
+# 種目別 1RM 推定式
+# bench:           weight × reps / 40   + weight
+# squat/deadlift:  weight × reps / 33.3 + weight
+_E1RM_DIVISOR = {"bench": 40.0, "deadlift": 33.3, "squat": 33.3}
+
+
+def _calc_e1rm(lift: str, weight: float, reps: int) -> float:
+    divisor = _E1RM_DIVISOR[lift]
+    return weight * reps / divisor + weight
+
+
 class HevyClient:
     def __init__(self, api_key: str):
         self.api_key = api_key
@@ -113,6 +124,6 @@ class HevyClient:
                         "weight_kg": kg,
                         "reps": reps,
                         "volume": kg * reps,
-                        "e1rm": round(kg * (1 + reps / 30), 1),  # Epley formula
+                        "e1rm": round(_calc_e1rm(lift, kg, reps), 1),
                     })
         return records
